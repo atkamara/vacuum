@@ -3,11 +3,11 @@ requires = ["flit"]
 build-backend = "flit.buildapi"
 
 [project]
-name =  "py-project-toml"
+name =  "vacuum"
 authors = [
-    {name = "Daniel Ciborowski", email = "dciborow@microsoft.com"},
+    {name = "Abdourahmane Tintou KAMARA", email = "atkamara.ds@outlook.com"},
 ]
-description = "Sample Python Project for creating a new Python Module"
+description = "HTML data parser for e-com websites"
 readme = "README.md"
 classifiers = [
     "Development Status :: 3 - Alpha",
@@ -19,7 +19,7 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11"
 ]
-requires-python = ">=3.8.1"
+requires-python = ">=3.9.1"
 dynamic = ["version"]
 
 [project.optional-dependencies]
@@ -47,12 +47,12 @@ test = [
 ]
 
 [project.urls]
-Documentation = "https://github.com/microsoft/python-package-template/tree/main#readme"
-Source = "https://github.com/microsoft/python-package-template"
-Tracker = "https://github.com/microsoft/python-package-template/issues"
+Documentation = "https://github.com/atkamara/vacuum/tree/master#readme"
+Source = "https://github.com/atkamara/vacuum/"
+Tracker = "https://github.com/atkamara/vacuum/tree/master/issues"
 
 [tool.flit.module]
-name = "python_package"
+name = "vacuum"
 
 [tool.bandit]
 exclude_dirs = ["build","dist","tests","scripts"]
@@ -98,12 +98,12 @@ exclude = [
     "**/node_modules",
     "**/__pycache__",
 ]
-venv = "env37"
+venv = "env39"
 
 reportMissingImports = true
 reportMissingTypeStubs = false
 
-pythonVersion = "3.7"
+pythonVersion = "3.9"
 pythonPlatform = "Linux"
 
 executionEnvironments = [
