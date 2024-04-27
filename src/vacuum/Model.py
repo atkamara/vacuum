@@ -1,11 +1,121 @@
+"""
+This module implements a development model with the following classes:
+
+- Formatter: A helper class for string formatting.
+
+- Field: An abstract class for creating Fields.
+
+- Item: A class for instances with fields.
+
+The Formatter class provides methods to format strings using placeholders and values.
+
+The Field class is an abstract base class that can be inherited to create custom fields for items.
+
+The Item class represents an instance with multiple fields, which can be accessed and manipulated using the Field objects.
+
+Usage:
+
+    ```python
+        >>> from .model import Formatter, Field, Item
+        >>> formatter = Formatter()
+        >>> field = Field()
+        >>> item = Item()
+    ```
+
+Imports:
+
+    - annotations : Importing 'from future import annotations' enables the use of postponed evaluation of annotations in type hints, allowing the use of class names before their definition.
+
+    - ABC, abstractmethod : The 'ABC' and 'abstractmethod' imports from 'abc' module provide tools for creating abstract base classes and abstract methods.
+
+    - wraps,_Wrapped : The 'wraps' and '_Wrapped' imports from 'functools' module are used for creating decorator functions that preserve the metadata of the original function.
+
+    - dateparser : The 'dateparser' import provides functionality for parsing date and time strings into human-readable format.
+
+    - logging : The 'logging' import allows for creating log messages, setting log level, and configuring logging behavior in the application.
+"""
+from __future__ import annotations
+from abc import ABC, abstractmethod
+from functools import wraps,_Wrapped
 import dateparser
-
+import logging
+logger = logging.getLogger()
 class Formatter:
-    
+    """
+    This class 'Formatter' provides methods for string formatting and casting values.
 
+    Methods:
 
+        cast(func): A static method that wraps a function to capture any exceptions and log warnings if the function fails.
+        fmethod property: A property that allows getting and setting the formatting method for the Formatter.
+        format(value): A method that applies the specified formatting method to the given value.
 
-class Field(Formatter):
+    Usage:
+    ```python
+        >>> formatter = Formatter()
+        >>> formatter.fmethod = custom_format_method
+        >>> formatted_value = formatter.format(input_value)
+    ```    
+    """
+    @staticmethod
+    def cast(func) -> _Wrapped:
+        """
+        This method 'cast' is a static method within the Formatter class that wraps a function to handle parsing errors and log warnings if the function fails.
+
+        Parameters:
+
+            func: The function to be wrapped for error handling.
+            value(str): The value to be passed to the wrapped function.
+
+        Returns:
+
+            wrapper: A wrapped function that captures and logs any exceptions that occur during the execution of the original function.
+            
+        Notes:
+            The 'wrapper' function captures any exceptions raised by 'func' when called with 'value'. If an exception occurs, a warning message is logged using the 'logger' module. The method then returns the result of the 'func' call or None if an exception was caught.
+
+            Note: This method is meant to be used as a decorator for methods that require error handling and logging for parsing or formatting operations.
+        """
+        @wraps(func)
+        def wrapper(self,value:str):
+            res = None
+            try:
+                res = func(value)
+            except:
+                logger.warning('failed parsing %s'%value)
+            return res
+        return wrapper
+    @property
+    def fmethod(self):
+        return self._fmethod
+    @fmethod.setter
+    def fmethod(self,func):
+        self._fmethod = func
+    @cast
+    def format(self,value):
+        return self.fmethod(value)
+class Field:
     xpaths:list[str]
     regex_list:list[str]
-    formatter : str
+class Item:
+    ...
+class Page(ABC):
+    xpaths:list[str]
+    _ix:int=0
+    @abstractmethod
+    def as_item(self,html)->Item:
+        ...
+    def __init__(self,response):
+        self.page_items = response.xpath('|'.join(self.xpaths))
+    def __len__(self):
+        return len(self.page_items)
+    def __iter__(self):
+        return self 
+    def __next__(self):
+        if self._ix < len(self):
+            self._ix += 1
+            return self[self._ix-1]
+        self.ix = 0
+        raise StopIteration
+    def __getitem__(self,ix):
+        return self.as_item(self.page_items[ix])
