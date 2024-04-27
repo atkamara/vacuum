@@ -7,7 +7,8 @@ class ProductTitle(Field):
     title = '{}[class=contains("title")][1]'.format
     header_tags = ['h2','h3','h4','h5',title('p'),title('div')]
     data = ['a[1]/@title','a[1]/text()','text()']
-    xpaths = [*map('/'.join,product(header_tags,data))]
+    set_xpaths = lambda data : [*map('/'.join,product(header_tags,data))]
+    xpaths = set_xpaths(data)
 @MainItem.register
 class PublishDate(Field):
     div = 'div[class=contains("{}")]'.format
@@ -27,10 +28,25 @@ class Contact(Field):
     xpaths = list(map('a/@href[starts_with("{}:")]'.format,types))
 @MainItem.register
 class PublishLink(Field):
-    ...
+    xpaths = ProductTitle.set_xpaths('a[1]/@href')
 @MainItem.register
 class ProductPrice(Field):
-    ...
+    price_test = '[class=contains("price")]'
+    price_classes = f"*{price_test}"+"{}".format
+    xpaths =[
+        price_classes('//text()'),
+        price_classes('/text()'),
+        f'a{price_test}/@name',
+        'h4[class="media-heading"]/span/text()'
+    ]
 @MainItem.register
 class VendorLocation(Field):
-    ...
+    loc_tests = ['[class=contains("map")]','[contains("location")]']
+    icon_tags = ['i','svg']
+    icon_text = ['/text']
+    parent = ['/..']
+    data = ['/descendant[2]/text()','/text()']
+    xpaths = list(map(''.join,product(icon_tags,loc_tests,parent,data)))+\
+             list(map(''.join,product(icon_tags,icon_text,loc_tests,parent,data)))+[
+            'img[src=contains(location)]/../text()'
+    ]   
