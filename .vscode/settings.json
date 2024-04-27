@@ -9,6 +9,11 @@
     "cSpell.ignoreWords": [
         "dateparser",
         "fmethod",
+        "modifyitems",
+        "nodeid",
         "xpaths"
+    ],
+    "cSpell.words": [
+        "atkamara"
     ]
 }
