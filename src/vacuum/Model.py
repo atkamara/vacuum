@@ -36,7 +36,7 @@ Imports:
 """
 from __future__ import annotations
 from abc import ABC, abstractmethod
-from functools import wraps,_Wrapped
+from functools import wraps
 import dateparser
 import logging
 logger = logging.getLogger()
@@ -59,7 +59,7 @@ class Formatter(ABC):
     ```    
     """
     @staticmethod
-    def cast(func) -> _Wrapped:
+    def cast(func) -> callable:
         """
         This method 'cast' is a static method within the Formatter class that wraps a function to handle parsing errors and log warnings if the function fails.
 
