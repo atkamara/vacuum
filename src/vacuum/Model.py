@@ -40,6 +40,7 @@ from functools import wraps,_Wrapped
 import dateparser
 import logging
 logger = logging.getLogger()
+from dataclasses import field as dcl_field,asdict, dataclass, make_dataclass
 class Formatter:
     """
     This class 'Formatter' provides methods for string formatting and casting values.
@@ -98,7 +99,36 @@ class Field:
     xpaths:list[str]
     regex_list:list[str]
 class Item:
-    ...
+    """
+    This class 'Item' represents an item with attributes defined dynamically using dataclasses.
+
+    Attributes:
+    - registry: A set that holds registered attribute fields for the Item class.
+    - incs: A list of additional fields to include in the Item class.
+
+    Methods:
+    - register(FieldClass): Registers a new attribute field for the Item class.
+    - __init__(): Constructs the Item class with dynamically created attributes based on the registered fields and additional fields.
+
+    Usage:
+    - Create instances of the Item class and register attribute fields using the 'register' method.
+    - Define additional fields to include in the class using the 'incs' attribute.
+    - Instantiate the Item class to create an object with dynamically generated attributes based on the registered fields and additional fields.
+
+    Note:
+    - The Item class uses dataclasses to dynamically create attribute fields based on the registered fields and the specified additional fields.
+    - The register method allows for adding new attribute fields to the Item class at runtime.
+    - The __init__ method constructs the Item class with the registered fields, additional fields, and a '__post_init__' method for post-initialization logic.
+    """
+    registry:set=set()
+    incs = [('created_at',field(init=False))]
+    def register(self,FieldClass)->None:
+        new_field = (FieldClass.__class__.__name__,field(init=False,default=FieldClass))
+        self.registry.add(dcl_field(new_field))
+    def __init__(self):
+        namespace = {'__post_init__':self.__post_init__}
+        Item = make_dataclass('Item', list(self.registry)+self.incs,namespace=namespace)
+        return Item
 class Page(ABC):
     """
     This abstract class 'Page' represents a webpage and provides methods for handling page content as items.
