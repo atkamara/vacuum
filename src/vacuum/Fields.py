@@ -6,15 +6,16 @@ from itertools import product
 class ProductTitle(Field):
     title = '{}[class=contains("title")][1]'.format
     header_tags = ['h2','h3','h4','h5',title('p'),title('div')]
-    child = ['a[1]','']
-    data = ['@title','::text()']
-    xpaths = ['/'.join(p for p in case if p) for case in product(header_tags,child,data)]
+    data = ['a[1]/@title','a[1]/text()','text()']
+    xpaths = [*map('/'.join,product(header_tags,data))]
 @MainItem.register
 class PublishDate(Field):
-    xpaths = [
-        'div[class="listing-card__header__date"]/text()',
+    div = 'div[class=contains("{}")]'.format
+    date_tags = [div('date'),div('time')]
+    data = ['text()','span[1]/text()']
+    xpaths = [*map('/'.join,product(date_tags,data))]+[
         'span/@data-bs-content',
-        'div[class="card-title ad__card-timesince"]/span/text()'
+        'div[ class="media-body"]/p[1]/text()'
     ]
 @MainItem.register
 class Contact(Field):
