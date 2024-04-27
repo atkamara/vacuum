@@ -1,8 +1,22 @@
-#   -------------------------------------------------------------
-#   Copyright (c) Microsoft Corporation. All rights reserved.
-#   Licensed under the MIT License. See LICENSE in project root for information.
-#   -------------------------------------------------------------
-"""Python Package Template"""
-from __future__ import annotations
+"""
+vacuum package
 
-__version__ = "0.0.2"
+This package contains modules related to data formatting and structured representation.
+
+Modules:
+- Fields.py
+- Item.py
+- Model.py
+- Page.py
+
+To use the package, import the specific modules as needed. For example:
+    from vacuum.Fields import Field
+    from vacuum.Item import Item
+    from vacuum.Model import Model
+    from vacuum.Page import Page
+"""
+from __future__ import annotations
+from . import *
+
+__version__ = "0.0.1"
+__author__ = 'atkamara'
