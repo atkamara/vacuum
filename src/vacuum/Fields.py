@@ -19,7 +19,12 @@ class PublishDate(Field):
     ]
 @MainItem.register
 class Contact(Field):
-    ...
+    types = [
+        'tel',
+        'sms',
+        'whatsapp'
+    ]
+    xpaths = list(map('a/@href[starts_with("{}:")]'.format,types))
 @MainItem.register
 class PublishLink(Field):
     ...
