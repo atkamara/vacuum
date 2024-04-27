@@ -100,6 +100,29 @@ class Field:
 class Item:
     ...
 class Page(ABC):
+    """
+    This abstract class 'Page' represents a webpage and provides methods for handling page content as items.
+
+    Attributes:
+
+        xpaths: A list of XPath expressions used to extract items from the page content.
+        _ix: An internal counter used for iteration over page items.
+
+    Methods:
+
+        as_item(html): An abstract method that converts HTML content into an 'Item' object.
+        init(response): Initializes the Page object with items extracted based on defined XPath expressions.
+        len(): Returns the number of items in the page.
+        iter(): Returns an iterator object for iterating over the page items.
+        next(): Returns the next item in the iteration or raises StopIteration if there are no more items.
+        getitem(ix): Returns the item at the specified index in the page items.
+
+    Usage:
+
+        Define a subclass of Page and implement the 'as_item' method to convert HTML content into an 'Item' object.
+        Instantiate the subclass with a response object containing the HTML content.
+        Use len(), iteration, and indexing to access and process items on the page. 
+    """
     xpaths:list[str]
     _ix:int=0
     @abstractmethod
