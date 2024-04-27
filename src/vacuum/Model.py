@@ -41,7 +41,7 @@ import dateparser
 import logging
 logger = logging.getLogger()
 from dataclasses import field as dcl_field,asdict, dataclass, make_dataclass
-class Formatter:
+class Formatter(ABC):
     """
     This class 'Formatter' provides methods for string formatting and casting values.
 
@@ -86,18 +86,37 @@ class Formatter:
                 logger.warning('failed parsing %s'%value)
             return res
         return wrapper
-    @property
-    def fmethod(self):
-        return self._fmethod
-    @fmethod.setter
-    def fmethod(self,func):
-        self._fmethod = func
+    @abstractmethod
+    def fmethod(self,value):
+        ...
     @cast
     def format(self,value):
         return self.fmethod(value)
-class Field:
+class Field(Formatter):
+    """
+    This class 'Field' extends the 'Formatter' class and represents a field with defined XPath expressions and regex patterns to extract values from HTML content.
+
+    Attributes:
+    - xpaths: A list of XPath expressions used to extract values from HTML content.
+    - regex_list: A list of regex patterns used to further process extracted values.
+
+    Methods:
+    - get_value(): Extracts values from HTML content using the defined XPath expressions and returns the formatted result.
+
+    Usage:
+    - Create instances of the Field class with specified XPath expressions and regex patterns.
+    - Call the 'get_value' method to extract values from HTML content using the defined XPath expressions and regex patterns.
+
+    Note:
+    - The Field class inherits from the 'Formatter' class and adds functionality for extracting values from HTML content.
+    - The class encapsulates logic for extracting and formatting values from HTML content using XPath expressions and regex patterns.
+    - The get_value method combines XPath extraction and regex processing to retrieve and format values from the HTML content.
+    """
     xpaths:list[str]
     regex_list:list[str]
+    def get_value(self):
+        out = self.html.xpath('|'.join(self.xpaths))
+        return self.format(out)
 class Item:
     """
     This class 'Item' represents an item with attributes defined dynamically using dataclasses.
@@ -121,10 +140,10 @@ class Item:
     - The __init__ method constructs the Item class with the registered fields, additional fields, and a '__post_init__' method for post-initialization logic.
     """
     registry:set=set()
-    incs = [('created_at',field(init=False))]
+    incs = [('html',dcl_field()),('created_at',dcl_field(init=False))]
     def register(self,FieldClass)->None:
-        new_field = (FieldClass.__class__.__name__,field(init=False,default=FieldClass))
-        self.registry.add(dcl_field(new_field))
+        new_field = (FieldClass.__class__.__name__,dcl_field(init=False))
+        self.registry.add(new_field)
     def __init__(self):
         namespace = {'__post_init__':self.__post_init__}
         Item = make_dataclass('Item', list(self.registry)+self.incs,namespace=namespace)
