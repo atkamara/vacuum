@@ -1,6 +1,11 @@
-import cython
-from typing import List
+import dateparser
 
-class Field:
-    regex:cython.char
-    regex_list:list
+class Formatter:
+    
+
+
+
+class Field(Formatter):
+    xpaths:list[str]
+    regex_list:list[str]
+    formatter : str
