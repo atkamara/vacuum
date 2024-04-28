@@ -53,7 +53,7 @@ class Formatter(ABC):
 
     Usage:
     ```python
-        >>> formatter = Formatter()
+        >>> formatter = Formatter
         >>> formatter.fmethod = custom_format_method
         >>> formatted_value = formatter.format(input_value)
     ```    
@@ -173,12 +173,15 @@ class Page(ABC):
         Use len(), iteration, and indexing to access and process items on the page. 
     """
     xpaths:list[str]
+    next_xpaths:list[str]
     _ix:int=0
     @abstractmethod
     def as_item(self,html)->Item:
         ...
     def __init__(self,response):
-        self.page_items = response.xpath('|'.join(self.xpaths))
+        self.response = response
+        self.page_items = self.response.xpath('|'.join(self.xpaths))
+        self.next = self.response.xpath('|'.join(self.next_xpaths)).get()
     def __len__(self):
         return len(self.page_items)
     def __iter__(self):
