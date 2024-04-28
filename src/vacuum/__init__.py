@@ -16,7 +16,10 @@ To use the package, import the specific modules as needed. For example:
     from vacuum.Page import Page
 """
 from __future__ import annotations
-from . import *
+from . import Item
+from . import Fields
+from . import Model
+from . import Page
 
 __version__ = "0.0.1"
 __author__ = 'atkamara'

@@ -13,9 +13,9 @@ class MainPage(Page):
     xpath2 = div("media panel panel-default")
     xpaths = [xpath0,xpath1,xpath2]
     next_xpaths = [
-        'a[id="prevnext"]',
-        'li[class="pagi-next"]/a[1],'
-        'a[class="page-link" and rel="next"]'
-    ]
+        'a[class="prevnext"]',
+        'a[class="page-link" and rel="next"]',
+        'li[class="pagi-next"]/a[1]',
+        'li.pagination-indicator/a/span[class="next"]/..' ]
     def as_item(self,html):
-        return MainItem(html)
+        return MainItem(html).dataclass

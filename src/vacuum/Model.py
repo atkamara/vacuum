@@ -114,7 +114,10 @@ class Field(Formatter):
     """
     xpaths:list[str]
     regex_list:list[str]
-    def get_value(self):
+    def __init__(self,html):
+        self.html = html
+    @property
+    def value(self):
         out = self.html.xpath('|'.join(self.xpaths))
         return self.format(out)
 class Item:
@@ -139,14 +142,21 @@ class Item:
     - The register method allows for adding new attribute fields to the Item class at runtime.
     - The __init__ method constructs the Item class with the registered fields, additional fields, and a '__post_init__' method for post-initialization logic.
     """
-    registry:set=set()
-    incs = [('html',dcl_field()),('created_at',dcl_field(init=False))]
-    def register(self,FieldClass)->None:
-        new_field = (FieldClass.__class__.__name__,dcl_field(init=False))
-        self.registry.add(new_field)
-    def __init__(self):
-        namespace = {'__post_init__':self.__post_init__}
-        Item = make_dataclass('Item', list(self.registry)+self.incs,namespace=namespace)
+    namespace = {}
+    @classmethod
+    def register(cls,FieldClass)->None:
+        if not hasattr(cls,'registry'):
+            cls.registry:set=set() 
+        cls.registry.add(FieldClass)
+    def __init__(self,html):
+        self.item_fields = {
+            (field.__name__,field(html).value) 
+            for field in self.registry
+            }
+    @property
+    def dataclass(self):
+        self.item_fields.add(('created_at',datetime.now()))
+        Item = make_dataclass(self.__name__, list(self.item_fields),namespace=self.namespace)
         return Item
 class Page(ABC):
     """
