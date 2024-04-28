@@ -148,15 +148,18 @@ class Item:
         if not hasattr(cls,'registry'):
             cls.registry:set=set() 
         cls.registry.add(FieldClass)
-    def __init__(self,html):
-        self.item_fields = {
-            (field.__name__,field(html).value) 
-            for field in self.registry
-            }
-    @property
-    def dataclass(self):
-        self.item_fields.add(('created_at',datetime.now()))
-        return make_dataclass(self.__class__.__name__, list(self.item_fields))
+    def __str__(self):
+        return self.__class__.__name__
+    @classmethod
+    def parse(cls,html):
+        self = cls()
+        item_fields = {
+            (field.__name__,
+             field.fmethod.__annotations__.get('return',str),
+             field(html).value) 
+            for field in self.registry}
+        item_fields.add(('created_at',datetime,datetime.now()))
+        return make_dataclass(str(self), item_fields)()
 class Page(ABC):
     """
     This abstract class 'Page' represents a webpage and provides methods for handling page content as items.

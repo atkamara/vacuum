@@ -28,9 +28,8 @@ def test_field_instance():
 
 def test_item_instance():
     # Test for Item class
-    with pytest.raises(AttributeError) :
-        Model.Item(None)
-    print("AttributeError Raised")
+    item = Model.Item()
+    isinstance(item,Model.Item)
 
 def test_page_instance():
     # Test for Page class
@@ -123,5 +122,5 @@ def test_MainItem_instance():
                           >
                         </div>
                       </div>'''
-    mi = Item.MainItem(Selector(text=html))
-    assert isinstance(mi,Item.MainItem)
+    mi = Item.MainItem.parse(Selector(text=html))
+    assert mi.__class__.__name__ == 'MainItem'
