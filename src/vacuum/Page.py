@@ -12,5 +12,10 @@ class MainPage(Page):
     xpath1 = div(f'matches("{regex}")')
     xpath2 = div("media panel panel-default")
     xpaths = [xpath0,xpath1,xpath2]
+    next_xpaths = [
+        'a[id="prevnext"]',
+        'li[class="pagi-next"]/a[1],'
+        'a[class="page-link" and rel="next"]'
+    ]
     def as_item(self,html):
         return MainItem(html)
