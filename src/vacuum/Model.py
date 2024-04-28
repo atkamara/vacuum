@@ -41,6 +41,7 @@ import dateparser
 import logging
 logger = logging.getLogger()
 from dataclasses import field as dcl_field,asdict, dataclass, make_dataclass
+from datetime import datetime
 class Formatter(ABC):
     """
     This class 'Formatter' provides methods for string formatting and casting values.
@@ -142,7 +143,6 @@ class Item:
     - The register method allows for adding new attribute fields to the Item class at runtime.
     - The __init__ method constructs the Item class with the registered fields, additional fields, and a '__post_init__' method for post-initialization logic.
     """
-    namespace = {}
     @classmethod
     def register(cls,FieldClass)->None:
         if not hasattr(cls,'registry'):
@@ -156,8 +156,7 @@ class Item:
     @property
     def dataclass(self):
         self.item_fields.add(('created_at',datetime.now()))
-        Item = make_dataclass(self.__name__, list(self.item_fields),namespace=self.namespace)
-        return Item
+        return make_dataclass(self.__class__.__name__, list(self.item_fields))
 class Page(ABC):
     """
     This abstract class 'Page' represents a webpage and provides methods for handling page content as items.
