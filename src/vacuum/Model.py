@@ -181,7 +181,7 @@ class Page(ABC):
     def __init__(self,response):
         self.response = response
         self.page_items = self.response.xpath('|'.join(self.xpaths))
-        self.next = self.response.xpath('|'.join(self.next_xpaths)).get()
+        self.next = '|'.join(self.next_xpaths)
     def __len__(self):
         return len(self.page_items)
     def __iter__(self):
