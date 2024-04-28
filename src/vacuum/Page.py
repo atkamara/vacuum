@@ -18,4 +18,4 @@ class MainPage(Page):
         'li[class="pagi-next"]/a[1]',
         'li.pagination-indicator/a/span[class="next"]/..' ]
     def as_item(self,html):
-        return MainItem(html).dataclass
+        return MainItem.parse(html)
