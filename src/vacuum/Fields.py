@@ -5,7 +5,16 @@ from typing import Union
 import dateparser
 from .Item import MainItem
 
-def ravel(value:Union[str,list[str],set[str]])->str:
+root=['//']
+phone='(%s)'%(r'[\s\-]{0,1}?'.join([
+                r'\+{0,1}?\d{0,3}',
+                r'\d{2}',
+                r'\d{3}',
+                r'\d{2}',
+                r'\d{2}'
+                ]))
+currency = r'(\d{1}.*?)[^\d\s,.]'
+def ravel(value:Union[str,list[str],set[str]],sep=' ')->str:
     """
     This function takes a value as input, which can be a string, list of strings, or a set of strings.
     If the input is a set or list, the function concatenates the strings into a single string separated by spaces.
@@ -18,16 +27,16 @@ def ravel(value:Union[str,list[str],set[str]])->str:
     str: The raveled string with removed newline characters and multiple spaces.
     """
     if isinstance(value,(set,list)):
-        value = ' '.join(value)
+        value = sep.join(set(value))
     raveled = value.replace('\n',' ')
     removed_multiple_spaces = re.sub(r'\s+',' ',raveled)
-    return removed_multiple_spaces
+    return removed_multiple_spaces.strip()
 @MainItem.register
 class ProductTitle(Field):
     title = '{}[contains(@class,"title")][1]'.format
     header_tags = ['h2','h3','h4','h5',title('p'),title('div')]
     data = ['a[1]/@title','a[1]/text()','text()']
-    xpaths = [*map('/'.join,product(header_tags,data))]
+    xpaths = [*map('/'.join,product(root,header_tags,data))]
     def fmethod(self,value:str)->str:
         return ravel(value)
 @MainItem.register
@@ -35,38 +44,39 @@ class PublishDate(Field):
     div = 'div[contains(@class,"{}")]'.format
     date_tags = [div('date'),div('time')]
     data = ['text()','span[1]/text()']
-    xpaths = [*map('/'.join,product(date_tags,data))]+[
+    xpaths = [*map('/'.join,product(root,date_tags,data))]+[
         'span/@data-bs-content',
         'div[ class="media-body"]/p[1]/text()']
     def fmethod(self,value:str)->str:
-        return ravel(value)
+        return dateparser.parse(ravel(value)).isoformat()
 @MainItem.register
 class Contact(Field):
     types = [
         'tel',
         'sms',
         'whatsapp']
-    xpaths = list(map('a/@href[starts_with("{}:")]'.format,types))
+    xpaths = list(map('//a[starts-with(@href,"{}:")]/@href'.format,types))
     def fmethod(self,value:str)->str:
-        return ravel(value)
+        return re.sub('[\s\-\+]','',';'.join(re.findall(phone,ravel(value))))
 @MainItem.register
 class PublishLink(Field):
     title = '{}[contains(@class,"title")][1]'.format
     header_tags = ['h2','h3','h4','h5',title('p'),title('div')]
-    xpaths =[*map('/'.join,product(header_tags,['a[1]/@href']))]
+    xpaths =[*map('/'.join,product(root,header_tags,['a[1]/@href']))]+['//a[1]/@href']
     def fmethod(self,value:str)->str:
-        return ravel(value)
+        return ravel(value,sep=';')
 @MainItem.register
 class ProductPrice(Field):
-    price_test = '[contains(@class,"price")]'
-    price_classes = (f"*{price_test}"+"{}").format
+    price_test1 = '[contains(@class,"price")]'
+    price_test2 = '[contains(name(),"price")]'
+    price_classes = (f"//*{price_test1}"+"{}").format
     xpaths =[
         price_classes('//text()'),
         price_classes('/text()'),
-        f'a{price_test}/@name',
-        'h4[class="media-heading"]/span/text()']
+        f'//a/@*{price_test2}',
+        '//h4[class="media-heading"]/span/text()']
     def fmethod(self,value:str)->str:
-        return ravel(value)
+        return re.sub('[\s,\.]','',';'.join(re.findall(currency,ravel(value,sep=';'))))
 @MainItem.register
 class VendorLocation(Field):
     loc_tests = ['[contains(@class,"map")]','[contains(@class,"location")]']
@@ -74,9 +84,9 @@ class VendorLocation(Field):
     icon_text = ['/text']
     parent = ['/..']
     data = ['/descendant[2]/text()','/text()']
-    xpaths = list(map(''.join,product(icon_tags,loc_tests,parent,data)))+\
-             list(map(''.join,product(icon_tags,icon_text,loc_tests,parent,data)))+[
-            'img[contains(@src,location)]/../text()'
+    xpaths = list(map(''.join,product(root,icon_tags,loc_tests,parent,data)))+\
+             list(map(''.join,product(root,icon_tags,icon_text,loc_tests,parent,data)))+[
+            '//img[contains(@src,location)]/../text()'
     ]
     def fmethod(self,value:str)->str:
         return ravel(value)   
