@@ -70,10 +70,6 @@ html = """          <div class="listings-cards__list-item">
                               xlink:href="https://www.test-site.com/assets/ed-site/icons/map.acdc5323.svg#gmaps"
                             ></use>
                           </svg>
-                          <a href="tel:221787320433"></a>
-                          <a href="whatsapp:221787320433"></a>
-                          <a href="whatsapp:phone=221007320433?message=..."></a>
-                          <a href="phone:221787320433"></a>
                           Liberte 6 extension, Dakar
                         </div>
                       </div>
@@ -87,6 +83,10 @@ html = """          <div class="listings-cards__list-item">
                   </div>
                 </div></a
               >
+                                        <a href="tel:221787320433"></a>
+                          <a href="whatsapp:221787320433"></a>
+                          <a href="whatsapp:phone=221007320433?message=..."></a>
+                          <a href="phone:221787320433"></a>
             </div>
           </div>"""
           
@@ -94,14 +94,22 @@ item = MainItem.parse(Selector(text=html))
 
 def test_field_ProductTitle():
     field = item.ProductTitle
-    ...
+    expected = "Centre d'Appels"
+    assert field == expected
 def test_field_PublishDate():
-    ...
+    field = item.PublishDate
+    assert len(field) == 19
 def test_field_Contact():
-    ...
+    field = item.Contact
+    assert all([s.isnumeric() for s in field.split(';')])
 def test_field_PublishLink():
-    ...
+    field = item.PublishLink
+    expected = 'https://www.test-site.com/annonce/centre-dappels-6056386'
+    assert expected == field
 def test_field_ProductPrice():
-    ...
+    field = item.ProductPrice
+    assert all([s.isnumeric() for s in field.split(';')])
 def test_field_VendorLocation():
-    ...
+    field = item.VendorLocation 
+    expected = 'Liberte 6 extension, Dakar'
+    assert field == expected

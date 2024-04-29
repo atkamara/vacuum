@@ -62,7 +62,7 @@ class Contact(Field):
 class PublishLink(Field):
     title = '{}[contains(@class,"title")][1]'.format
     header_tags = ['h2','h3','h4','h5',title('p'),title('div')]
-    xpaths =[*map('/'.join,product(root,header_tags,['a[1]/@href']))]+['//a[1]/@href']
+    xpaths =[*map('/'.join,product(root,header_tags,['a[1]/@href']))]+['//a[contains(@class,listing)][1]/@href']
     def fmethod(self,value:str)->str:
         return ravel(value,sep=';')
 @MainItem.register
