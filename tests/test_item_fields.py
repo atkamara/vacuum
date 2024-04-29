@@ -1,3 +1,17 @@
+"""
+Module Test Fields
+
+This module contains test functions for different fields in the item object. Each test function
+compares a specific field of the item with an expected value or condition.
+
+Functions:
+- test_field_ProductTitle(): Checks 'Product Title' field of the item.
+- test_field_PublishDate(): Checks 'Publish Date' field of the item.
+- test_field_Contact(): Checks 'Contact' field of the item.
+- test_field_PublishLink(): Checks 'Publish Link' field of the item.
+- test_field_ProductPrice(): Checks 'Product Price' field of the item.
+- test_field_VendorLocation(): Checks 'Vendor Location' field of the item.
+"""
 from vacuum.Item import MainItem
 from scrapy import Selector
 
@@ -93,23 +107,46 @@ html = """          <div class="listings-cards__list-item">
 item = MainItem.parse(Selector(text=html))
 
 def test_field_ProductTitle():
+    """
+    This test function checks if the 'ProductTitle' field of the item matches the expected value 'Centre d'Appels'.
+    """
     field = item.ProductTitle
     expected = "Centre d'Appels"
     assert field == expected
+
 def test_field_PublishDate():
+    """
+    This test function checks if the 'PublishDate' field of the item has a length of 19 characters.
+    """
     field = item.PublishDate
     assert len(field) == 19
+
 def test_field_Contact():
+    """
+    This test function checks if the 'Contact' field of the item consists of only numeric characters separated by semicolons.
+    """
     field = item.Contact
     assert all([s.isnumeric() for s in field.split(';')])
+
 def test_field_PublishLink():
+    """
+    This test function checks if the 'PublishLink' field of the item matches the expected value 'https://www.test-site.com/annonce/centre-dappels-6056386'.
+    """
     field = item.PublishLink
     expected = 'https://www.test-site.com/annonce/centre-dappels-6056386'
     assert expected == field
+
 def test_field_ProductPrice():
+    """
+    This test function checks if the 'ProductPrice' field of the item consists of only numeric characters separated by semicolons.
+    """
     field = item.ProductPrice
     assert all([s.isnumeric() for s in field.split(';')])
+
 def test_field_VendorLocation():
+    """
+    This test function checks if the 'VendorLocation' field of the item matches the expected value 'Liberte 6 extension, Dakar'.
+    """
     field = item.VendorLocation 
     expected = 'Liberte 6 extension, Dakar'
     assert field == expected
