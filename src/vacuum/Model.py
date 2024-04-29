@@ -36,7 +36,7 @@ Imports:
 """
 from __future__ import annotations
 from abc import ABC, abstractmethod
-from functools import wraps
+from functools import wraps,cached_property
 import dateparser
 import logging
 logger = logging.getLogger()
@@ -114,13 +114,19 @@ class Field(Formatter):
     - The get_value method combines XPath extraction and regex processing to retrieve and format values from the HTML content.
     """
     xpaths:list[str]
+    relative_xpaths:list[str]
     regex_list:list[str]
     def __init__(self,html):
         self.html = html
-    @property
-    def value(self):
-        out = self.html.xpath('|'.join(self.xpaths)).getall()
+    def getter(self,paths='xpaths'):
+        out = self.html.xpath('|'.join(self.__getattribute__(paths))).getall()
         return self.Format(out)
+    @cached_property      
+    def value(self):
+        return self.getter(paths='xpaths')
+    @cached_property 
+    def relative_value(self):
+        return self.getter(paths='relative_xpaths')
 class Item:
     
     """
@@ -152,12 +158,12 @@ class Item:
     def __str__(self):
         return self.__class__.__name__
     @classmethod
-    def parse(cls,html):
+    def parse(cls,html,method='value'):
         self = cls()
         item_fields = [
             (field.__name__,
              field.fmethod.__annotations__.get('return',str).__name__,
-             field(html).value) 
+             getattr(field(html),method)) 
             for field in self.registry
             ]+ [('created_at',datetime,datetime.now().isoformat())]
         return make_dataclass(str(self), item_fields)()
