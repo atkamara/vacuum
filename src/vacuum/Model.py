@@ -82,7 +82,7 @@ class Formatter(ABC):
         def wrapper(self,value:str):
             res = None
             try:
-                res = func(value)
+                res = func(self,value)
             except:
                 logger.warning('failed parsing %s'%value)
             return res
@@ -91,7 +91,7 @@ class Formatter(ABC):
     def fmethod(self,value):
         ...
     @cast
-    def format(self,value):
+    def Format(self,value):
         return self.fmethod(value)
 class Field(Formatter):
     """
@@ -119,9 +119,10 @@ class Field(Formatter):
         self.html = html
     @property
     def value(self):
-        out = self.html.xpath('|'.join(self.xpaths))
-        return self.format(out)
+        out = self.html.xpath('|'.join(self.xpaths)).getall()
+        return self.Format(out)
 class Item:
+    
     """
     This class 'Item' represents an item with attributes defined dynamically using dataclasses.
 
@@ -153,12 +154,12 @@ class Item:
     @classmethod
     def parse(cls,html):
         self = cls()
-        item_fields = {
+        item_fields = [
             (field.__name__,
-             field.fmethod.__annotations__.get('return',str),
+             field.fmethod.__annotations__.get('return',str).__name__,
              field(html).value) 
-            for field in self.registry}
-        item_fields.add(('created_at',datetime,datetime.now()))
+            for field in self.registry
+            ]+ [('created_at',datetime,datetime.now().isoformat())]
         return make_dataclass(str(self), item_fields)()
 class Page(ABC):
     """
