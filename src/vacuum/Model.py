@@ -42,6 +42,7 @@ import logging
 logger = logging.getLogger()
 from dataclasses import field as dcl_field,asdict, dataclass, make_dataclass
 from datetime import datetime
+import pandas
 class Formatter(ABC):
     """
     This class 'Formatter' provides methods for string formatting and casting values.
@@ -203,13 +204,15 @@ class Page(ABC):
         self.next = self.response.xpath('|'.join(self.next_xpaths)).get()
     def __len__(self):
         return len(self.page_items)
+    def __rshift__(self,f):
+        return pandas.DataFrame(map(asdict,self)).to_hdf(f'{f}.h5',min_itemsize=500,key='data',append=True,format='table')
     def __iter__(self):
         return self 
     def __next__(self):
         if self._ix < len(self):
             self._ix += 1
             return self[self._ix-1]
-        self.ix = 0
+        self._ix = 0
         raise StopIteration
     def __getitem__(self,ix):
         return self.as_item(self.page_items[ix])
