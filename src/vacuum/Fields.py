@@ -7,19 +7,19 @@ import dateparser
 from .Item import MainItem
 
 root=['//']
-phone='(%s)'%(r'[\s\-]{0,1}?'.join([
+phone=r'[\s\-]{0,1}?'.join([
                 r'\+{0,1}?\d{0,3}',
-                r'\d{2}',
+                r'(\d{2}',
                 r'\d{3}',
                 r'\d{2}',
-                r'\d{2}'
-                ]))
+                r'\d{2})'
+                ])
 currency = r'(\d{1}.*?)[^\d\s,.]'
 
 @lru_cache(maxsize=None)
 def get_relative(paths:tuple):
     return [
-        path[3:]
+        re.sub(r'^\/+','descendant::',path)
         for path in paths
     ]
 def ravel(value:Union[str,list[str],set[str]],sep=' ')->str:
@@ -65,10 +65,10 @@ class Contact(Field):
         'tel',
         'sms',
         'whatsapp']
-    xpaths = list(map('//a[starts-with(@href,"{}:")]/@href'.format,types))
+    xpaths = list(map(r'//a[starts-with(@href,"{}:")]/@href'.format,types))
     relative_xpaths = get_relative(tuple(xpaths))
     def fmethod(self,value:str)->str:
-        return re.sub('[\s\-\+]','',';'.join(re.findall(phone,ravel(value))))
+        return re.sub('[\s\-\+]','',';'.join(set(re.findall(phone,ravel(value)))))
 @MainItem.register
 class PublishLink(Field):
     title = '{}[contains(@class,"title")][1]'.format
@@ -99,7 +99,7 @@ class VendorLocation(Field):
     data = ['/descendant[2]/text()','/text()']
     xpaths = list(map(''.join,product(root,icon_tags,loc_tests,parent,data)))+\
              list(map(''.join,product(root,icon_tags,icon_text,loc_tests,parent,data)))+[
-            '//img[contains(@src,location)]/../text()']
+            '//img[contains(@src,"location")]/../text()']
     relative_xpaths = get_relative(tuple(xpaths))
     def fmethod(self,value:str)->str:
         return ravel(value)   
