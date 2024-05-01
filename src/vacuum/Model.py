@@ -43,6 +43,8 @@ logger = logging.getLogger()
 from dataclasses import field as dcl_field,asdict, dataclass, make_dataclass
 from datetime import datetime
 import pandas
+from sqlalchemy.orm import DeclarativeBase
+from sqlalchemy import create_engine
 class Formatter(ABC):
     """
     This class 'Formatter' provides methods for string formatting and casting values.
@@ -166,7 +168,7 @@ class Item:
              field.fmethod.__annotations__.get('return',str).__name__,
              getattr(field(html),method)) 
             for field in self.registry
-            ]+ [('created_at',datetime,datetime.now().isoformat())]
+            ]+ [('CreatedAt',datetime,datetime.now().isoformat())]
         return make_dataclass(str(self), item_fields)()
 class Page(ABC):
     """

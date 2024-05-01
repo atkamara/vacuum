@@ -1,5 +1,6 @@
 from .Model import Page
 from .Item import MainItem
+from .dbModel import MainItem as MainTable
 
 class MainPage(Page):
     xpath0 = '//article[contains(@class,"item") and not(contains(@class,"cart"))]'
@@ -12,5 +13,6 @@ class MainPage(Page):
         f'//a[{next_test}]/@href',
         '//*[contains(@class,"next")]/a[1]/@href'
         ]
+    sql_table = MainTable
     def as_item(self,html):
         return MainItem.parse(html,method='relative_value')
