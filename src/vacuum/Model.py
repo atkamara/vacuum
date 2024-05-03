@@ -42,9 +42,7 @@ import logging
 logger = logging.getLogger()
 from dataclasses import field as dcl_field,asdict, dataclass, make_dataclass
 from datetime import datetime
-import pandas
-from sqlalchemy.orm import DeclarativeBase
-from sqlalchemy import create_engine
+import configparser
 class Formatter(ABC):
     """
     This class 'Formatter' provides methods for string formatting and casting values.
@@ -122,7 +120,7 @@ class Field(Formatter):
     def __init__(self,html):
         self.html = html
     def getter(self,paths='xpaths'):
-        out = self.html.xpath('|'.join(self.__getattribute__(paths))).getall()
+        out = self.html.xpath('|'.join(self.__getattr__(paths))).getall()
         return self.Format(out)
     @cached_property      
     def value(self):
@@ -170,6 +168,29 @@ class Item:
             for field in self.registry
             ]+ [('CreatedAt',datetime,datetime.now().isoformat())]
         return make_dataclass(str(self), item_fields)()
+class Config:
+    _conf_file :str
+    _val_conf_attr:list=[]
+    check_stage:int=0
+    @cached_property
+    def read_conf(self):
+        config = configparser.ConfigParser()
+        config.read(self._conf_file)
+        return config
+    def __str__(self):
+        return self.__class__.__name__
+    def __getattr__(self,val):
+        if self.check_stage == 0:
+            self.check_stage = 1
+            if val in self._val_conf_attr:
+                self.check_stage = 0
+                conf = self.read_conf[str(self)][val]
+                if conf.startswith('['):
+                    conf = eval(conf)
+                return conf
+            self.check_stage = 0
+        else :
+            return self.__getattribute__(val)
 class Page(ABC):
     """
     This abstract class 'Page' represents a webpage and provides methods for handling page content as items.
@@ -207,7 +228,7 @@ class Page(ABC):
     def __len__(self):
         return len(self.page_items)
     def __rshift__(self,f):
-        return pandas.DataFrame(map(asdict,self)).to_hdf(f'{f}.h5',min_itemsize=500,key='data',append=True,format='table')
+        ...
     def __iter__(self):
         return self 
     def __next__(self):
